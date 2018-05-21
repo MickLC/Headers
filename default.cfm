@@ -10,23 +10,21 @@
 <cfif structKeyExists(form,'var1')>
 
 	<!--- Working definition of a keyword:  text between a newline(or the beginning of the text) and the first colon, if there is no space between them --->
-	<cfset HeaderAry = ArrayNew(2)>;
+	<cfset HeaderAry = ArrayNew(2)>
 	<cfset i = 1> <!---Input line number--->
 	<cfset j=0> <!---Array element number--->
 	<cfset lastReturn = 0> 
 	<cfset nextColon = 1> <!--- Temporary non-zero value to enter loop--->
-	<cfset k = 1>
-	<cfwhile k LT 4>
-		<cfset k = k + 1>
+	<cfwhile nextColon is not 0 >
 		<cfset nextSpace = find(" ", form.var1, lastReturn)>
 		<cfset nextColon = find(":", form.var1, lastReturn+1)>
-		<cfset nextReturn = find(chr(13), form.var1,lastreturn)>
+		<cfset nextReturn = find(chr(13), form.var1,lastreturn+1)>
 <cfoutput>lastReturn = #lastReturn# nextSpace = #nextSpace# nextColon - #nextColon# nextReturn = #nextReturn#<BR></cfoutput>
-		<cfif nextColon LT nextSpace and nextColon LT nextReturn>
+		<cfif nextColon LT nextSpace and nextColon LT nextReturn and nextReturn is not 0>
 			<cfset j = j + 1>
 			<cfset HeaderAry[j][1] = #mid(form.var1,lastReturn + 1, nextColon-lastReturn)#>
 			<cfset HeaderAry[j][2] = #mid(form.var1, nextColon + 1, nextReturn-nextColon)#>
-		<cfelse>
+		<cfelseif nextReturn is not 0>
 			<cfset HeaderAry[j][2] = HeaderAry[j][2] & mid(form.var1,lastReturn+1,nextReturn-lastReturn)>
 		</cfif>
 		<cfset lastReturn = nextReturn>
