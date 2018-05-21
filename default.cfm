@@ -21,7 +21,7 @@
 		<cfset nextSpace = find(" ", form.var1, lastReturn)>
 		<cfset nextColon = find(":", form.var1, lastReturn+1)>
 		<cfset nextReturn = find(chr(13), form.var1,lastreturn)>
-
+<cfoutput>lastReturn = #lastReturn# nextSpace = #nextSpace# nextColon - #nextColon# nextReturn = #nextReturn#<BR></cfoutput>
 		<cfif nextColon LT nextSpace and nextColon LT nextReturn>
 			<cfset j = j + 1>
 			<cfset HeaderAry[j][1] = #mid(form.var1,lastReturn + 1, nextColon-lastReturn)#>
