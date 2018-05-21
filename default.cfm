@@ -9,9 +9,10 @@
 </cfform>
 <cfif structKeyExists(form,'var1')>
     <cftry>
+	<cfset form.var1 = xmlFormat(form.var1) />
+
 	<!--- Working definition of a keyword:  text between a newline(or the beginning of the text) and the first colon(followed immediately by a space),
 	but only if there is no space somewhere before the colon--->
-
 	<cfset HeaderAry = ArrayNew(2)>
 	<cfset i = 1> <!---Input line number--->
 	<cfset j=0> <!---Array element number--->
@@ -35,34 +36,21 @@
 		<cfset lastReturn = nextReturn>
 	</cfwhile> 
 
-	<table border="1"><cfoutput>
-		<cfloop from = "1" to = "#j#" index = "k">
-			<tr><td>#HeaderAry[k][1]#</td><td>#HeaderAry[k][2]#</td></tr>
-		</cfloop>
-	</cfoutput></table>
+	<cfxml variable="headerxml">
+		<header>
+		<cfoutput>
+			<cfloop from = "1" to = "#j#" index = "k">
+				<headerLine name="#HeaderAry[k][1]#" content="#HeaderAry[k][2]#" />
+			</cfloop>
+		</cfoutput>
+		</header>
+	</cfxml>
+
 
     <cfcatch type="any">
 	<cfdump var="#cfcatch#">
     </cfcatch>
 </cftry>
-
-<!---
-	<cfset result1 = listToArray("#form.var1#",chr(13),false,true)>
-	<cfset continue = true>
-	<cfwhile continue> 
-		<cfset receivedlines = #arrayContains(result1,"Received:",true)#>
-		<cfif receivedlines is not 0>
-			<cfdump var="#result1[receivedlines]#"><BR>	
-			<cfscript>
-			arrayDeleteAt(result1,receivedlines);
-			</cfscript>
-		<cfelse>
-			<cfset continue = false>
-		</cfif>
-	</cfwhile>
-	<cfset result1 = listToArray("#form.var1#",chr(13),false,true)>
-	<cfdump var="#result1#">
---->
 </cfif>
 </html>
 
