@@ -49,7 +49,17 @@
                                 <cfelseif #trim(HeaderAry[k][1])# EQ "Delivered-To:">
 					<Delivered-To>#HeaderAry[k][2]#</Delivered-To>
                                 <cfelseif #trim(HeaderAry[k][1])# EQ "Received:">
-					<Received>#HeaderAry[k][2]#</Received>
+					<!---<Received>#HeaderAry[k][2]#</Received>--->
+					<cfset ipStart=#refindNoCase("\[",HeaderAry[k][2],1)#>
+					<cfset ipEnd=#refindNoCase("\]",HeaderAry[k][2],1)#>
+					<cfset IP = #mid(HeaderAry[k][2],ipStart+1,ipEnd-ipStart-1)#>
+					<cfset receiverStart = #refindNoCase("by",HeaderAry[k][2],1)#>
+					<cfset receiverEnd = #refindNoCase(" ",HeaderAry[k][2],receiverStart+3)#>
+					<cfset Receiver = #mid(HeaderAry[k][2],receiverStart+3,receiverEnd-receiverStart-3)#>
+					<cfset dateSetUp=#right(HeaderAry[k][2],39)#>
+					<cfset dateStart=#findNoCase(" ",dateSetUp,1)#>
+					<cfset Date=#mid(dateSetUp,dateStart,-1)#>
+					<Received IP = "#IP#" Receiver = "#Receiver#" Date="#Date#">#HeaderAry[k][2]#</Received>
                                 <cfelseif #trim(HeaderAry[k][1])# EQ "Return-Path:">
 					<Return-Path>#HeaderAry[k][2]#</Return-Path>
                                 <cfelseif #trim(HeaderAry[k][1])# EQ "Message-Id:">
