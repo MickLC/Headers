@@ -40,12 +40,37 @@
 		<header>
 		<cfoutput>
 			<cfloop from = "1" to = "#j#" index = "k">
-				<headerLine name="#HeaderAry[k][1]#" content="#HeaderAry[k][2]#" />
+				<cfif #trim(HeaderAry[k][1])# EQ "To:">
+					<To>#HeaderAry[k][2]#</To>
+				<cfelseif #trim(HeaderAry[k][1])# EQ "From:">
+					<From>#HeaderAry[k][2]#</From>
+				<cfelseif #trim(HeaderAry[k][1])# EQ "Subject:">
+                                        <Subject>#HeaderAry[k][2]#</Subject>
+                                <cfelseif #trim(HeaderAry[k][1])# EQ "Delivered-To:">
+					<Delivered-To>#HeaderAry[k][2]#</Delivered-To>
+                                <cfelseif #trim(HeaderAry[k][1])# EQ "Received:">
+					<Received>#HeaderAry[k][2]#</Received>
+                                <cfelseif #trim(HeaderAry[k][1])# EQ "Return-Path:">
+					<Return-Path>#HeaderAry[k][2]#</Return-Path>
+                                <cfelseif #trim(HeaderAry[k][1])# EQ "Message-Id:">
+					<Message-Id>#HeaderAry[k][2]#</Message-Id>
+                                <cfelseif #left(trim(HeaderAry[k][1]),2)# EQ "X-">
+					<X-header name="#trim(HeaderAry[k][1])#">#HeaderAry[k][2]#</X-header>
+                                <cfelseif #trim(HeaderAry[k][1])# EQ "Content-Type:">
+					<Content-Type>#HeaderAry[k][2]#</Content-Type>
+                                <cfelseif #trim(HeaderAry[k][1])# EQ "Date:">
+					<Date>#HeaderAry[k][2]#</Date>
+                                <cfelseif #trim(HeaderAry[k][1])# EQ "MIME-Version:">
+					<MIME-Version>#HeaderAry[k][2]#</MIME-Version>		
+				<cfelse>
+					<headerLine name="#HeaderAry[k][1]#" content="#HeaderAry[k][2]#" />
+				</cfif>
 			</cfloop>
 		</cfoutput>
 		</header>
 	</cfxml>
 
+	<cfdump var="#headerxml#">
 
     <cfcatch type="any">
 	<cfdump var="#cfcatch#">
