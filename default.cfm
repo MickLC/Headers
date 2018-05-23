@@ -41,23 +41,27 @@
 		<cfoutput>
 			<cfloop from = "1" to = "#j#" index = "k">
 				<cfif #trim(HeaderAry[k][1])# EQ "To:">
-					<cfset emailStart=#refindNoCase("&lt;",HeaderAry[k][2],1)#>
-                                        <cfset emailEnd=#refindNoCase("&gt;",HeaderAry[k][2],1)#>
+					<cfset emailTo="#trim(HeaderAry[k][2])#">
+					<cfset emailStart=#refindNoCase("&lt;",emailTo,1)#>
+                                        <cfset emailEnd=#refindNoCase("&gt;",emailTo,1)#>
                                         <cfif emailStart GT "0">
-                                                <cfset email = #mid(HeaderAry[k][2],emailStart+4,emailEnd-emailStart-4)#>
-						<cfset domainStart=#refindNoCase("@",email,1)#>
-						<cfset domain=#mid(email,domainStart+1,-1)#>
-                                        </cfif>
-					<To<cfif isDefined("email")> email="#email#" domain="#domain#"></cfif>#HeaderAry[k][2]#</To>
+                                                <cfset email = #mid(emailTo,emailStart+4,emailEnd-emailStart-4)#>
+					<cfelse>
+						<cfset email = #emailTo#>
+					</cfif>
+                                        <cfset domainStart=#refindNoCase("@",email,1)#>
+                                        <cfset domain=#mid(email,domainStart+1,-1)#>
+                                        <To<cfif isDefined("email")> email="#email#" domain="#domain#"</cfif>>#emailTo#</To>
 				<cfelseif #trim(HeaderAry[k][1])# EQ "From:">
-                                        <cfset emailStart=#refindNoCase("&lt;",HeaderAry[k][2],1)#>
-                                        <cfset emailEnd=#refindNoCase("&gt;",HeaderAry[k][2],1)#>
+					<cfset emailFrom="#trim(HeaderAry[k][2])#">
+                                        <cfset emailStart=#refindNoCase("&lt;",emailFrom,1)#>
+                                        <cfset emailEnd=#refindNoCase("&gt;",emailFrom,1)#>
                                         <cfif emailStart GT "0">
-                                                <cfset email = #mid(HeaderAry[k][2],emailStart+4,emailEnd-emailStart-4)#>
+                                                <cfset email = #mid(emailFrom,emailStart+4,emailEnd-emailStart-4)#>
                                                 <cfset domainStart=#refindNoCase("@",email,1)#>
                                                 <cfset domain=#mid(email,domainStart+1,-1)#>    
                                         </cfif>
-                                        <From<cfif isDefined("email")> email="#email#" domain="#domain#"></cfif>#HeaderAry[k][2]#</From>
+                                        <From<cfif isDefined("email")> email="#email#" domain="#domain#"</cfif>>#emailFrom#</From>
 				<cfelseif #trim(HeaderAry[k][1])# EQ "Subject:">
                                         <Subject>#HeaderAry[k][2]#</Subject>
                                 <cfelseif #trim(HeaderAry[k][1])# EQ "Delivered-To:">
@@ -72,7 +76,7 @@
 					<cfset receiverStart = #refindNoCase("by",HeaderAry[k][2],1)#>
 					<cfset receiverEnd = #refindNoCase(" ",HeaderAry[k][2],receiverStart+3)#>
 					<cfset Receiver = #mid(HeaderAry[k][2],receiverStart+3,receiverEnd-receiverStart-3)#>
-					<cfset dateSetUp=#right(HeaderAry[k][2],39)#>
+					<cfset dateSetUp=#right(HeaderAry[k][2],40)#>
 					<cfset dateStart=#findNoCase(" ",dateSetUp,1)#>
 					<cfset Date=#mid(dateSetUp,dateStart,-1)#>
 					<Received <cfif ipStart GT "0">IP = "#IP#"</cfif> Receiver = "#Receiver#" Date="#Date#">#HeaderAry[k][2]#</Received>
