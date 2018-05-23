@@ -41,9 +41,23 @@
 		<cfoutput>
 			<cfloop from = "1" to = "#j#" index = "k">
 				<cfif #trim(HeaderAry[k][1])# EQ "To:">
-					<To>#HeaderAry[k][2]#</To>
+					<cfset emailStart=#refindNoCase("&lt;",HeaderAry[k][2],1)#>
+                                        <cfset emailEnd=#refindNoCase("&gt;",HeaderAry[k][2],1)#>
+                                        <cfif emailStart GT "0">
+                                                <cfset email = #mid(HeaderAry[k][2],emailStart+4,emailEnd-emailStart-4)#>
+						<cfset domainStart=#refindNoCase("@",email,1)#>
+						<cfset domain=#mid(email,domainStart+1,-1)#>
+                                        </cfif>
+					<To<cfif isDefined("email")> email="#email#" domain="#domain#"></cfif>#HeaderAry[k][2]#</To>
 				<cfelseif #trim(HeaderAry[k][1])# EQ "From:">
-					<From>#HeaderAry[k][2]#</From>
+                                        <cfset emailStart=#refindNoCase("&lt;",HeaderAry[k][2],1)#>
+                                        <cfset emailEnd=#refindNoCase("&gt;",HeaderAry[k][2],1)#>
+                                        <cfif emailStart GT "0">
+                                                <cfset email = #mid(HeaderAry[k][2],emailStart+4,emailEnd-emailStart-4)#>
+                                                <cfset domainStart=#refindNoCase("@",email,1)#>
+                                                <cfset domain=#mid(email,domainStart+1,-1)#>    
+                                        </cfif>
+                                        <From<cfif isDefined("email")> email="#email#" domain="#domain#"></cfif>#HeaderAry[k][2]#</From>
 				<cfelseif #trim(HeaderAry[k][1])# EQ "Subject:">
                                         <Subject>#HeaderAry[k][2]#</Subject>
                                 <cfelseif #trim(HeaderAry[k][1])# EQ "Delivered-To:">
@@ -52,20 +66,24 @@
 					<!---<Received>#HeaderAry[k][2]#</Received>--->
 					<cfset ipStart=#refindNoCase("\[",HeaderAry[k][2],1)#>
 					<cfset ipEnd=#refindNoCase("\]",HeaderAry[k][2],1)#>
-					<cfset IP = #mid(HeaderAry[k][2],ipStart+1,ipEnd-ipStart-1)#>
+					<cfif ipStart GT "0">
+						<cfset IP = #mid(HeaderAry[k][2],ipStart+1,ipEnd-ipStart-1)#>
+					</cfif>
 					<cfset receiverStart = #refindNoCase("by",HeaderAry[k][2],1)#>
 					<cfset receiverEnd = #refindNoCase(" ",HeaderAry[k][2],receiverStart+3)#>
 					<cfset Receiver = #mid(HeaderAry[k][2],receiverStart+3,receiverEnd-receiverStart-3)#>
 					<cfset dateSetUp=#right(HeaderAry[k][2],39)#>
 					<cfset dateStart=#findNoCase(" ",dateSetUp,1)#>
 					<cfset Date=#mid(dateSetUp,dateStart,-1)#>
-					<Received IP = "#IP#" Receiver = "#Receiver#" Date="#Date#">#HeaderAry[k][2]#</Received>
+					<Received <cfif ipStart GT "0">IP = "#IP#"</cfif> Receiver = "#Receiver#" Date="#Date#">#HeaderAry[k][2]#</Received>
                                 <cfelseif #trim(HeaderAry[k][1])# EQ "Return-Path:">
 					<Return-Path>#HeaderAry[k][2]#</Return-Path>
                                 <cfelseif #trim(HeaderAry[k][1])# EQ "Message-Id:">
 					<Message-Id>#HeaderAry[k][2]#</Message-Id>
                                 <cfelseif #left(trim(HeaderAry[k][1]),2)# EQ "X-">
-					<X-header name="#trim(HeaderAry[k][1])#">#HeaderAry[k][2]#</X-header>
+					<cfset headerlineend = #findnocase(":",HeaderAry[k][1],1)#>
+                                        <cfset headerline = #mid(HeaderAry[k][1],2,headerlineend-2)#>
+                                        <#headerline# type="x-header">#HeaderAry[k][2]#</#headerline#>
                                 <cfelseif #trim(HeaderAry[k][1])# EQ "Content-Type:">
 					<Content-Type>#HeaderAry[k][2]#</Content-Type>
                                 <cfelseif #trim(HeaderAry[k][1])# EQ "Date:">
@@ -73,7 +91,9 @@
                                 <cfelseif #trim(HeaderAry[k][1])# EQ "MIME-Version:">
 					<MIME-Version>#HeaderAry[k][2]#</MIME-Version>		
 				<cfelse>
-					<headerLine name="#HeaderAry[k][1]#" content="#HeaderAry[k][2]#" />
+					<cfset headerlineend = #findnocase(":",HeaderAry[k][1],1)#>
+					<cfset headerline = #mid(HeaderAry[k][1],2,headerlineend-2)#>
+					<#headerline#>#HeaderAry[k][2]#</#headerline#>
 				</cfif>
 			</cfloop>
 		</cfoutput>
