@@ -168,6 +168,10 @@
 		<cfset abuseFindStart = #refind("is",whoisOut,abuseFindStart)#>
 		<cfset abuseFindStart = #refind(" ",whoisOut,abuseFindStart)#>
 	</cfif>
+	<cfif abuseFindStart EQ '0'>
+		<cfset abuseFindStart = #refind("OrgAbuseEmail:",whoisOut,1)#>
+		<cfset abuseFindStart = #refind(" ",whoisOut,abuseFindStart)#>
+	</cfif>
 	<cfset abuseFindEnd = #refindnocase(chr(10),whoisOut,abuseFindStart)#>
 	<cfset abuseFind = #rereplace(mid(whoisOut,abuseFindStart,abuseFindEnd-abuseFindStart),"[^0-9A-Za-z@.]","","all")#>
 
