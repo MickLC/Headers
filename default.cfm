@@ -3,7 +3,7 @@
 </head>
 <html>
 <cfform action="default.cfm" method="post">
-	<p>Enter your headers in the first box:</p>
+	<p>Enter your headers in the box:</p>
 	<textarea rows="15" cols="80" name="var1"></textarea><br />
 	<button type="submit">Submit</button>
 </cfform>
@@ -36,7 +36,7 @@
 		<cfset lastReturn = nextReturn>
 	</cfwhile> 
 
-	<cfxml variable="headerxml">
+	<cfxml variable="headerxml" caseSensitive="no">
 		<header>
 		<cfoutput>
 			<cfloop from = "1" to = "#j#" index = "k">
@@ -104,8 +104,81 @@
 		</header>
 	</cfxml>
 
-	<cfdump var="#headerxml#">
+<!---<cfdump var="#headerxml#">--->
 
+<cfset headerDoc = xmlparse(headerxml)>
+<!---<cfdump var="#headerDoc#">--->
+
+<cfset toDomain=headerDoc.header.To.xmlattributes.domain>
+
+<cfscript>
+        cfexecute(
+                variable="digOut",
+                name="dig mx",
+                arguments="#toDomain#",
+                timeout=3
+        );
+</cfscript>
+
+<cfoutput>
+<cfset answerStart = #refind("ANSWER SECTION",digOut,1)#>
+<cfset mxpreStart = #refind("(MX)",digOut,answerStart)#>
+<cfset mxStart = #refind("( \w)",digOut,mxpreStart+4)#>
+<cfset mxEnd = #refindnocase(chr(10),digOut,mxStart)#>
+<cfset mx = #mid(digOut,mxStart,mxEnd-mxStart-1)#>
+<cfset mxArray = #listtoarray(mx,".")#>
+<!---<p>MX = #mx#</p>--->
+
+<cfset ipa = headerDoc.header.Received>
+<cfset ips = arraylen(ipa)>
+
+<cfloop index="i" from="1" to="#ips#">
+	<cfif isDefined("headerDoc.header.Received[i].xmlattributes.ip")>
+	<cfset ip = #headerDoc.header.Received[i].xmlattributes.ip#>
+	<cfif ip NEQ "127.0.0.1">
+		<cfset retain = #i#>
+		<cfset receiver = #headerDoc.header.Received[i].xmlattributes.Receiver#>
+		<cfset receiverArray = #listtoarray(receiver,".")#>
+		<!---<p>#i# Receiver = #Receiver#</p>
+		<p>#i# IP = #IP#</p>--->
+	</cfif>
+	</cfif>
+</cfloop>
+
+<cfset mxArray.retainAll(receiverArray)>
+<cfset whatSame = arraytolist(mxArray)>
+
+<!---=<cfdump var="#receiver#">
+<cfdump var="#headerDoc.header.Received[retain].xmlattributes.ip#">
+<cfdump var="#whatSame#">--->
+
+<cfif arrayLen(mxArray) GT "1">
+<cfscript>
+        cfexecute(
+                variable="whoisOut",
+                name="whois",
+                arguments="#headerDoc.header.Received[retain].xmlattributes.ip#",
+                timeout=3
+        );
+</cfscript>
+
+	<cfset abuseFindStart = #refind("abuse@",whoisOut,1)#>
+	<cfif abuseFindStart EQ '0'>
+		<cfset abuseFindStart = #refind("Abuse contact",whoisOut,1)#>
+		<cfset abuseFindStart = #refind("is",whoisOut,abuseFindStart)#>
+		<cfset abuseFindStart = #refind(" ",whoisOut,abuseFindStart)#>
+	</cfif>
+	<cfset abuseFindEnd = #refindnocase(chr(10),whoisOut,abuseFindStart)#>
+	<cfset abuseFind = #rereplace(mid(whoisOut,abuseFindStart,abuseFindEnd-abuseFindStart),"[^0-9A-Za-z@.]","","all")#>
+
+	<!---<p>abuseFindStart = #abuseFindStart#</p>
+	<p>abuseFindEnd = #abuseFindEnd#</p>--->
+        <p>Relevant Received header: <strong>Received: #headerDoc.header.Received[retain].XmlText#</strong></p>
+	<p>Abuse contact from WHOIS = #abuseFind#</p>
+
+</cfif>
+
+</cfoutput>
     <cfcatch type="any">
 	<cfdump var="#cfcatch#">
     </cfcatch>
